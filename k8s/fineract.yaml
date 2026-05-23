@@ -1,0 +1,31 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fineract
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fineract
+  template:
+    metadata:
+      labels:
+        app: fineract
+    spec:
+      containers:
+      - name: fineract
+        image: apache/fineract:latest
+        ports:
+        - containerPort: 8443
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fineract
+spec:
+  selector:
+    app: fineract
+  ports:
+  - port: 8443
+    targetPort: 8443

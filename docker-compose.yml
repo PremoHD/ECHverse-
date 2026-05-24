@@ -1,44 +1,87 @@
+version: '3.8'
 
-version: '3.9'
+x-common-env: &common-env
+  GCP_PROJECT_ID: ${PROJECT_ID:-ellis-clearing-house}
+  PUBSUB_EMULATOR_HOST: pubsub-emulator:8085
+  SPANNER_EMULATOR_HOST: spanner-emulator:9010
+  NODE_ENV: development
 
 services:
-  postgres:
-    image: postgres:16
+  # 1. Transport Layer: The Sovereign Ingress
+  ech-auth-gateway:
+    image: envoyproxy/envoy:v1.28-latest
+    container_name: ech_auth_gateway
+    ports:
+      - "443:443/udp"   # QUIC / HTTP/3 Mandatory Transport
+      - "8443:8443/tcp" # Fallback & Webhook Ingress
+    volumes:
+      - ./config/envoy.yaml:/etc/envoy/envoy.yaml:ro
+      - ./certs:/etc/ssl/certs:ro # mTLS developer certs
+    networks:
+      - devoid-mesh
+    depends_on:
+      - pubsub-emulator
+
+  # 2. Apple Pay Decryption (Edge Cryptography)
+  apple-pay-ingress:
+    build:
+      context: ./services/apple-pay
+      dockerfile: Dockerfile
+    container_name: apple_pay_ingress
     environment:
-      POSTGRES_PASSWORD: example
-    ports:
-      - "5432:5432"
+      <<: *common-env
+      KMS_EMULATOR_MODE: "true" # Simulates GCP KMS for ECC decryption
+      PUBSUB_TOPIC: state-events
+    networks:
+      - devoid-mesh
 
-  redis:
-    image: redis:7
-    ports:
-      - "6379:6379"
-
-  kafka:
-    image: bitnami/kafka:latest
+  # 3. Chime & Modern Rails (Instant Settlement)
+  chime-visa-relayer:
+    build:
+      context: ./services/chime-relayer
+      dockerfile: Dockerfile
+    container_name: chime_relayer
     environment:
-      - KAFKA_CFG_NODE_ID=0
-      - KAFKA_CFG_PROCESS_ROLES=controller,broker
-      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
-      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@localhost:9093
-      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-    ports:
-      - "9092:9092"
+      <<: *common-env
+      VISA_DIRECT_API_URL: https://sandbox.api.visa.com/visadirect/v1/pullfundstransactions
+      VISA_CERT_PATH: /etc/ssl/certs/visa-dev.pem
+    networks:
+      - devoid-mesh
 
-  fineract:
-    image: apache/fineract:latest
-    ports:
-      - "8444:8443"
+  # 4. NCSECU & Legacy Rails (Asynchronous ACH)
+  ncsecu-ach-engine:
+    build:
+      context: ./services/nacha-engine
+      dockerfile: Dockerfile
+    container_name: ncsecu_ach_engine
+    environment:
+      <<: *common-env
+      ACH_ROUTING_TARGET: "253177049" # NCSECU
+      SEC_CODES_SUPPORTED: "PPD,WEB,CCD"
+      GCS_BUCKET_NAME: "ech-nacha-staging-local"
+    networks:
+      - devoid-mesh
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:latest
-    command: start-dev
+  # 5. The State Event Bus (Pub/Sub Emulator)
+  pubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:emulators
+    container_name: pubsub_emulator
+    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
     ports:
-      - "8080:8080"
+      - "8085:8085"
+    networks:
+      - devoid-mesh
 
-  kong:
-    image: kong:latest
+  # 6. The Non-Custodial Ledger State (Spanner Emulator)
+  spanner-emulator:
+    image: gcr.io/cloud-spanner-emulator/emulator:latest
+    container_name: spanner_emulator
     ports:
-      - "8000:8000"
-      - "8443:8443"
+      - "9010:9010"
+      - "9020:9020"
+    networks:
+      - devoid-mesh
+
+networks:
+  devoid-mesh:
+    driver: bridge

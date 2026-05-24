@@ -1,0 +1,14 @@
+{
+  "name": "chime-visa-relayer",
+  "version": "1.0.0",
+  "description": "Chime / Visa Direct instant-settlement relayer for the ECHverse Devoid stack",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "@google-cloud/pubsub": "^4.0.0"
+  }
+}

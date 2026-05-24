@@ -1,0 +1,17 @@
+# Secrets
+.env
+certs/*.pem
+certs/*.key
+certs/*.crt
+
+# Node
+node_modules/
+services/*/node_modules/
+
+# Build artifacts
+dist/
+build/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,75 @@
+static_resources:
+  listeners:
+    - name: https_listener
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8443
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: ingress_https
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: ech_services
+                      domains: ["*"]
+                      routes:
+                        - match:
+                            prefix: "/apple-pay"
+                          route:
+                            cluster: apple_pay_ingress
+                        - match:
+                            prefix: "/settle"
+                          route:
+                            cluster: chime_relayer
+                        - match:
+                            prefix: "/ach"
+                          route:
+                            cluster: ncsecu_ach_engine
+                http_filters:
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+  clusters:
+    - name: apple_pay_ingress
+      connect_timeout: 5s
+      type: STRICT_DNS
+      load_assignment:
+        cluster_name: apple_pay_ingress
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: apple-pay-ingress
+                      port_value: 3000
+
+    - name: chime_relayer
+      connect_timeout: 5s
+      type: STRICT_DNS
+      load_assignment:
+        cluster_name: chime_relayer
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: chime-visa-relayer
+                      port_value: 3001
+
+    - name: ncsecu_ach_engine
+      connect_timeout: 5s
+      type: STRICT_DNS
+      load_assignment:
+        cluster_name: ncsecu_ach_engine
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: ncsecu-ach-engine
+                      port_value: 3002

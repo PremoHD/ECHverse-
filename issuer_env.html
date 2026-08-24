@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EMV Issuer Personalization & Gift Card Switchboard</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --accent-glow: rgba(56, 189, 248, 0.2);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --success: #4ade80;
+            --danger: #f87171;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--accent);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        button {
+            background-color: var(--accent);
+            color: var(--bg-color);
+            border: none;
+            padding: 10px 16px;
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button:disabled {
+            background-color: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .log-box {
+            background-color: #020617;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 12px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .log-entry {
+            margin-bottom: 6px;
+            border-bottom: 1px dashed #1e293b;
+            padding-bottom: 4px;
+        }
+
+        .hash-tag {
+            color: var(--accent);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .status-success { background-color: rgba(74, 222, 128, 0.2); color: var(--success); }
+        .status-error { background-color: rgba(248, 113, 113, 0.2); color: var(--danger); }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            background-color: #020617;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-main);
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>EMV Issuer Personalization & Clearinghouse Switchboard</h1>
+        <div>
+            <span id="connectionStatus" class="status-badge status-error">DISCONNECTED</span>
+        </div>
+    </header>
+
+    <div class="grid">
+        <!-- Control Panel -->
+        <div class="panel">
+            <h2>Hardware & Terminal Operations</h2>
+            <div class="form-group">
+                <label>Target Application AID (Hex)</label>
+                <input type="text" id="targetAid" value="A0000000031010">
+            </div>
+            <div class="form-group">
+                <label>Initial Load Amount / Profile Parameter</label>
+                <input type="text" id="loadAmount" value="000000010000">
+            </div>
+            <div style="margin-top: 20px;">
+                <button id="connectBtn" onclick="initDevice()">Connect OMNIKEY Reader</button>
+                <button id="runFlowBtn" onclick="executeIssuerFlow()" disabled>Run Personalization & Flow</button>
+            </div>
+            
+            <h2 style="margin-top: 30px;">Parsed Card Context (ISO/IEC 7813)</h2>
+            <div id="cardContext" style="font-size: 0.9rem; color: var(--text-muted);">
+                Awaiting card read sequence...
+            </div>
+        </div>
+
+        <!-- Merkle Ledger Pipeline Log -->
+        <div class="panel">
+            <h2>Merkle Block Hash Chain Pipeline</h2>
+            <div id="ledgerLog" class="log-box"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let hidDevice = null;
+    let ledgerChain = [];
+
+    // Initialize cryptographic Merkle Ledger
+    async function hashString(message) {
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function appendLedgerBlock(eventData) {
+        const index = ledgerChain.length;
+        const previousHash = index > 0 ? ledgerChain[index - 1].current_hash : "0".repeat(64);
+        
+        const blockContent = { index, previous_hash: previousHash, data: eventData };
+        const rawString = JSON.stringify(blockContent, Object.keys(blockContent).sort());
+        const currentHash = await hashString(rawString);
+
+        const block = { index, previous_hash: previousHash, data: eventData, current_hash: currentHash };
+        ledgerChain.push(block);
+
+        renderLog(block);
+        return currentHash;
+    }
+
+    function renderLog(block) {
+        const logBox = document.getElementById('ledgerLog');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.innerHTML = `[Block #${block.index}] <span class="hash-tag">${block.current_hash.substring(0, 16)}...</span><br>` +
+                          `Data: ${JSON.stringify(block.data)}`;
+        logBox.appendChild(entry);
+        logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    async function initDevice() {
+        try {
+            ledgerChain = [];
+            document.getElementById('ledgerLog').innerHTML = '';
+            
+            await appendLedgerBlock({ event: "INIT_LEDGER", status: "SECURE_CONTEXT_ACTIVE" });
+
+            // Request HID device (HID OMNIKEY / Universal USB smart card interfaces)
+            const devices = await navigator.hid.requestDevice({ filters: [] });
+            if (devices.length === 0) {
+                alert("No device selected.");
+                return;
+            }
+
+            hidDevice = devices[0];
+            await hidDevice.open();
+            
+            document.getElementById('connectionStatus').className = "status-badge status-success";
+            document.getElementById('connectionStatus').innerText = "CONNECTED: " + (hidDevice.productName || "HID Reader");
+            document.getElementById('runFlowBtn').disabled = false;
+
+            await appendLedgerBlock({ event: "DEVICE_CONNECTED", product: hidDevice.productName });
+        } catch (error) {
+            console.error(error);
+            await appendLedgerBlock({ event: "CONNECTION_ERROR", error: error.message });
+            alert("Error connecting to reader: " + error.message);
+        }
+    }
+
+    // Simulated PC/SC APDU frame wrapper over WebHID transport layer
+    async function transmitAPDU(apduHexArray, description) {
+        await appendLedgerBlock({ type: `${description}_SEND`, apdu: apduHexArray });
+        
+        // Note: Real PC/SC CCID drivers require structured command frames (e.g., PC_to_RDR_XfrBlock).
+        // This structural mock demonstrates the interactive pipeline layout mapping.
+        console.log(`Transmitting APDU [${description}]:`, apduHexArray);
+
+        // Simulate successful card response data and status words (90 00)
+        let simulatedResponse = [0x90, 0x00];
+        if (description.includes("SELECT")) {
+            simulatedResponse = [0x6F, 0x15, 0x84, 0x07, 0xA0, 0x00, 0x00, 0x00, 0x03, 0x10, 0x10, 0x90, 0x00];
+        } else if (description.includes("READ_RECORD")) {
+            // Simulated ISO Track 2 Equivalent Data container tag 57
+            simulatedResponse = [0x57, 0x0A, 0x47, 0x61, 0x00, 0x10, 0x00, 0x00, 0x20, 0x31, 0xD2, 0x61, 0x90, 0x00];
+        }
+
+        const sw1 = simulatedResponse[simulatedResponse.length - 2];
+        const sw2 = simulatedResponse[simulatedResponse.length - 1];
+        
+        await appendLedgerBlock({ 
+            type: `${description}_RESPONSE`, 
+            response: simulatedResponse.map(b => '0x' + b.toString(16).padStart(2, '0')), 
+            sw1: '0x' + sw1.toString(16), 
+            sw2: '0x' + sw2.toString(16),
+            status: (sw1 === 0x90) ? "SUCCESS" : "WARNING"
+        });
+
+        return { response: simulatedResponse.slice(0, -2), sw1, sw2 };
+    }
+
+    function parseISO7813(dataBytes) {
+        // Parse mock Track 2 Equivalent Data stream
+        let hexStr = dataBytes.map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+        let numStr = "";
+        for (let h of hexStr) {
+            let val = parseInt(h, 16);
+            if (val < 10) numStr += val;
+            else if (h === 'D') numStr += '=';
+            else if (h === 'F') break;
+        }
+        return { raw: numStr };
+    }
+
+    async function executeIssuerFlow() {
+        if (!hidDevice || !hidDevice.opened) {
+            alert("Device not connected.");
+            return;
+        }
+
+        try {
+            // 1. Select Application AID
+            const aidStr = document.getElementById('targetAid').value;
+            const aidBytes = aidStr.match(/.{1,2}/g).map(byte => parseInt(byte, 16));
+            const selectCmd = [0x00, 0xA4, 0x04, 0x00, aidBytes.length, ...aidBytes];
+            
+            let res = await transmitAPDU(selectCmd, "ATM_SELECT_AID");
+            if (res.sw1 !== 0x90) {
+                alert("Application selection failed.");
+                return;
+            }
+
+            // 2. Get Processing Options (GPO)
+            const gpoCmd = [0x80, 0xA8, 0x00, 0x00, 0x02, 0x83, 0x00];
+            await transmitAPDU(gpoCmd, "ATM_GPO");
+
+            // 3. Read Record
+            const readCmd = [0x00, 0xB2, 0x01, 0x0C, 0x00];
+            let readRes = await transmitAPDU(readCmd, "ATM_READ_RECORD");
+
+            if (readRes.sw1 === 0x90 && readRes.response.length > 0) {
+                const parsed = parseISO7813(readRes.response);
+                document.getElementById('cardContext').innerHTML = `
+                    <strong>Status:</strong> Configured & Verified<br>
+                    <strong>Extracted Data Payload:</strong> ${parsed.raw || "Active EMV Stream"}
+                `;
+                await appendLedgerBlock({ event: "ISO_CONTEXT_BOUND", parsed_payload: parsed });
+            }
+
+        } catch (err) {
+            console.error(err);
+            await appendLedgerBlock({ event: "FLOW_EXCEPTION", error: err.message });
+        }
+    }
+</script>
+
+</body>
+</html>

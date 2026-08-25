@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Command Pilot",
+  "version": "1.0.0",
+  "description": "A local, user-directed browser action agent that plans first and runs only approved actions.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_title": "Command Pilot",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

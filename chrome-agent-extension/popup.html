@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Command Pilot</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <div class="eyebrow">LOCAL BROWSER AGENT</div>
+        <h1>Command Pilot</h1>
+        <p>Turn plain-language instructions into a visible action plan. Nothing runs until you approve it.</p>
+      </header>
+
+      <section class="panel instruction-panel" aria-labelledby="instruction-heading">
+        <div class="section-heading">
+          <h2 id="instruction-heading">What should happen?</h2>
+          <span class="badge">Plan first</span>
+        </div>
+        <label class="sr-only" for="instruction">Browser instruction</label>
+        <textarea id="instruction" rows="5" placeholder="Example: Go to example.com, type hello@example.com into Email, then click Continue."></textarea>
+        <div class="quick-actions" aria-label="Example instructions">
+          <button type="button" class="quick-action" data-example="Scroll to the bottom">Scroll</button>
+          <button type="button" class="quick-action" data-example="Click Settings">Click</button>
+          <button type="button" class="quick-action" data-example="Type hello@example.com into Email">Type</button>
+        </div>
+        <button id="planButton" class="primary" type="button">Create action plan</button>
+      </section>
+
+      <section id="planPanel" class="panel hidden" aria-live="polite" aria-labelledby="plan-heading">
+        <div class="section-heading">
+          <h2 id="plan-heading">Proposed actions</h2>
+          <span id="planCount" class="badge neutral">0 steps</span>
+        </div>
+        <ol id="planList" class="plan-list"></ol>
+        <div id="highImpactNotice" class="warning hidden">
+          <strong>High-impact action detected.</strong>
+          <p>Review the marked step carefully. Command Pilot will not run it until you explicitly confirm below.</p>
+          <label class="check-row"><input id="highImpactApproval" type="checkbox" /> I understand and approve the marked action.</label>
+        </div>
+        <button id="runButton" class="primary run" type="button" disabled>Run approved actions</button>
+        <button id="clearButton" class="secondary" type="button">Clear plan</button>
+      </section>
+
+      <section class="panel permissions" aria-labelledby="permissions-heading">
+        <div class="section-heading">
+          <h2 id="permissions-heading">Site access</h2>
+          <span id="accessBadge" class="badge neutral">Checking…</span>
+        </div>
+        <p>By default, the agent can act only on the tab you explicitly open it from. Enable broader access only if you want a multi-site workflow to continue after navigation.</p>
+        <button id="accessButton" class="secondary" type="button">Enable optional all-site access</button>
+      </section>
+
+      <section class="safety-note">
+        <h2>Safety boundary</h2>
+        <p>Instructions are planned locally. The extension does not use a remote model or send your page content anywhere. It never enters passwords, one-time codes, payment verification values, government IDs, or recovery credentials.</p>
+      </section>
+
+      <output id="status" class="status" aria-live="polite"></output>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

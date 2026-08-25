@@ -1,79 +1,79 @@
-# Command Pilot
+# AgentSmith Command Console
 
-**Command Pilot** is a functional Manifest V3 Chrome extension for executing a small, auditable set of browser actions from plain-language instructions. It creates an explicit plan, displays every action, and runs nothing until the user chooses **Run approved actions**. Its planner is intentionally local and deterministic: it does not send the instruction, webpage text, form data, or browsing activity to a remote service.
+**AgentSmith Command Console** is a Manifest V3 Chrome extension for local, user-directed browser missions. It combines a deterministic instruction planner, on-demand page inspection, a reviewable signal queue, a persisted mission state, and a local execution ledger. The console is informed by the supplied AgentSmith suite’s pipeline, audit, and dashboard concepts; its specific adaptation record is available in [SOURCE_PROVENANCE.md](SOURCE_PROVENANCE.md).
 
-> **Design rule:** The extension is an assistant for user-directed navigation and page interaction, not an autonomous background operator. It never has permission to act without a visible user approval step.
+> **Operating model:** A mission is always built, displayed, and deliberately run by the user. Planning never changes the page. The extension does not use a remote model, transmit page content, accept web-page commands, or run a hidden background workflow.
 
-| Capability | Behaviour |
+| Console capability | What it does |
 |---|---|
-| Navigate | Opens an `http` or `https` URL in the current tab. |
-| Click | Finds the best matching visible button, link, or clickable control by its accessible label or displayed text. |
-| Type | Writes text into a visibly labeled text field after the user approves the plan. |
-| Scroll | Moves the page up, down, left, right, top, or bottom. |
-| Confirmation | Every plan must be reviewed and deliberately run. High-impact verbs require an additional checkbox confirmation. |
-| Sensitive data | The extension refuses to fill password, one-time-code, payment-verification, government-ID, private-key, or recovery-phrase fields. |
+| Mission planning | Converts supported instructions into visible browser actions. |
+| Page signals | Inspects the current page on demand and maps visible controls and fields into a local review queue. |
+| Mission queue | Persists the planned action sequence and its progress in local extension storage. |
+| Execution ledger | Retains the most recent 200 planned, completed, and failed mission/action records locally. |
+| High-impact guard | Separately requires acknowledgement for actions whose label or requested behavior indicates deletion, payment, transfer, publishing, access changes, or similar material impact. |
+| Sensitive-field guard | Refuses to enter passwords, one-time codes, payment verification values, government identifiers, private keys, or recovery credentials. |
+| Scoped site access | Starts with temporary access to the tab in which the user invokes it; all-site access remains an optional, user-enabled permission. |
 
 ## Install locally
 
-Open `chrome://extensions` in Chrome, enable **Developer mode**, choose **Load unpacked**, and select this `chrome-agent-extension` directory. Pin **Command Pilot** from the Extensions menu if desired. Open the extension from the active page, write an instruction, select **Create action plan**, review each proposed step, and then select **Run approved actions**.
+Download and extract the extension archive, then open `chrome://extensions` in Chrome. Enable **Developer mode**, select **Load unpacked**, and choose the extracted `chrome-agent-extension` directory. Pin **AgentSmith Command Console** from Chrome’s Extensions menu if desired.
 
-The default permission set is deliberately narrow. `activeTab` supplies temporary access only to the tab from which the user invokes the extension, while `scripting` is used to inject the page controller only when needed. For workflows that cross to a different website after navigation, the user can manually enable the optional all-site access button in the popup. Chrome’s documentation describes `activeTab` as temporary host access following a user invocation and documents `scripting` with either host permissions or `activeTab`. [1] [2]
+The default configuration uses `activeTab`, `scripting`, and `storage`. The first two permissions permit an extension to act on the user-invoked active tab and inject an on-demand controller; broader host access is optional. Chrome describes `activeTab` as temporary host access following a user invocation, and documents `scripting` with either `activeTab` or host permissions. [1] [2]
 
-## Instruction language
+## Mission language
 
-Command Pilot accepts a sequence of these safe, deterministic statements. Separate actions with **then**, **and then**, **next**, a semicolon, or a new line.
+Separate actions with **then**, **and then**, **next**, a semicolon, or a new line. The console accepts the following local, deterministic patterns.
 
 | Intent | Examples |
 |---|---|
+| Inspect | `Inspect this page` · `Scan page` · `Map current site` |
 | Navigate | `Go to example.com` · `Open https://example.com/help` |
 | Click | `Click Settings` · `Press Continue` · `Select Save changes` |
-| Type | `Type hello@example.com into Email` · `Enter "Taylor" into the First name field` |
+| Type | `Type hello@example.com into Email` · `Enter "Taylor" into First name` |
 | Scroll | `Scroll down` · `Scroll to the bottom` · `Scroll up 800px` |
-| Sequence | `Go to example.com, then type hello@example.com into Email, then click Continue` |
+| Wait | `Wait 2 seconds` · `Wait 10` |
+| Sequence | `Inspect this page, then click Settings, then scroll to the bottom` |
 
-The extension preserves the exact parsed action in the visible plan. If an instruction is ambiguous or outside the supported action language, it stops and explains what it could not safely interpret rather than improvising an action.
+The console preserves the parsed action in its visible **Approved queue**. If a clause is ambiguous or outside the supported command language, it reports the clause rather than guessing an action.
 
-## Safety model
+## Signals and the execution ledger
 
-| Boundary | Implementation |
-|---|---|
-| Explicit approval | Planning and execution are separate controls. Creating a plan never changes the webpage. |
-| High-impact protection | The plan marks action labels containing terms such as `delete`, `purchase`, `pay`, `send`, `transfer`, `sign`, `publish`, or `grant access`; the user must separately check an approval box before execution. |
-| Secret-entry protection | Page-side checks block sensitive fields by their input type, label, name, ID, autocomplete hint, and placeholder. |
-| No remote planning | There are no server calls, content uploads, model API keys, or remote analytics in the extension. |
-| No background page scraping | The page controller is injected only after user interaction. It does not crawl pages or run continually. |
-| No external command channel | The extension does not accept messages from websites or other extensions. |
-| Safe rendering | Popup content is rendered with DOM text nodes rather than untrusted HTML. |
+The **Signals** tab is the browser-native adaptation of the supplied AgentSmith suite’s review queue. Selecting **Inspect active page** locally maps visible buttons, links, and fields. It records only the control labels, type, score, and security markers; it does **not** collect or upload the page’s body, user-entered field values, credentials, payment data, or browsing history.
 
-Chrome’s extension messaging guidance advises treating content-script messages as less trustworthy and validating or sanitizing input. This implementation limits the message protocol to a fixed action schema and routes it only between its own popup, service worker, and injected controller. [3]
+The **Ledger** tab adapts the supplied append-only audit concept for the extension environment. It keeps the 200 most recent records in `chrome.storage.local`, including planned missions and completed or failed actions. It supports review of what the user directed the extension to do, not autonomous execution beyond that approval. Chrome’s security guidance recommends treating content-script communication as less trustworthy and validating inputs; AgentSmith uses a fixed message schema, no external message listener, and DOM text rendering rather than untrusted HTML. [3]
+
+## Essential boundaries
+
+The supplied original source combines a full-stack dashboard with remote AI, Reddit, Stripe, database, payment, and cloud/CLI components. Those capabilities cannot safely be moved wholesale into a generic browser extension: they depend on separate user accounts, service credentials, policy obligations, and transaction authorization. The upgrade adopts the reusable architecture—inspection, queueing, scoring, mission state, and auditability—while deliberately excluding continuous scraping, unsolicited messaging, financial account operations, payment-link creation, secret handling, SSH/cloud-shell control, and unapproved background work.
+
+This is a capability and safety boundary, not an installation limitation. The extension remains fully functional for its documented browser-mission scope and makes every potentially consequential step legible and user-approved.
 
 ## Project layout
 
 ```text
 chrome-agent-extension/
-├── manifest.json      # Manifest V3 permissions and popup/service-worker entry points
-├── popup.html         # Plan-and-approval interface
-├── popup.css          # Popup styling
-├── popup.js           # Local parser, plan renderer, and user-approved executor
-├── background.js      # Action-schema validator and active-tab coordinator
-├── controller.js      # Visible-control resolver and sensitive-field guard
-└── README.md          # Setup and operating guide
+├── manifest.json                # Manifest V3 configuration
+├── package.json                 # Local module/test metadata
+├── planner.js                   # Deterministic mission parser
+├── background.js                # Mission coordinator and local audit ledger
+├── controller.js                # Page observer and action executor
+├── popup.html                   # Agent console interface
+├── popup.css                    # Console styling
+├── popup.js                     # Console behavior and review workflow
+├── SOURCE_PROVENANCE.md         # Mapping from supplied sources to this extension
+├── README.md                    # Installation and operating guide
+└── tests/validate-extension.mjs # Static and parser validation
 ```
 
-## Manual verification checklist
+## Validation
 
-After loading the unpacked extension, test on a non-sensitive site such as a local demo page or a disposable account.
+Run the following command from this directory:
 
-1. Enter `Scroll to the bottom`, create the plan, and run it. The page should scroll only after approval.
-2. Enter `Click Settings` on a page with a visible Settings button. Confirm that the plan names the intended control before running it.
-3. Enter `Type example@example.com into Email` on a harmless test form. Confirm that the email field receives the text after approval.
-4. Enter `Click Delete` on a test page. Confirm that the run button remains disabled until the high-impact checkbox is selected.
-5. Attempt `Type secret into Password`. The controller must stop and require manual entry.
-6. Create a cross-site sequence such as `Go to example.com then click More information`. Confirm that it either has optional all-site access enabled or stops rather than silently extending its access.
+```bash
+node tests/validate-extension.mjs
+```
 
-## Known limits
-
-This version does not attempt to solve CAPTCHAs, bypass login prompts, read or enter credentials, interact with browser-internal pages, or infer intentions beyond the supported command patterns. Some heavily customized sites may not expose a usable visible or accessible label for a control; in that case, the agent stops rather than risking a click on a different element.
+The script verifies the required files, Manifest V3 structure, least-privilege defaults, JavaScript module syntax, and representative command parsing. After loading the extension, manually verify an **Inspect**, **Scroll**, **Click**, **Type**, and **high-impact** workflow on a non-sensitive test page.
 
 ## References
 

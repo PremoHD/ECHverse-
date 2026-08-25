@@ -1,0 +1,8 @@
+{
+  "name": "agentsmith-command-console-extension",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node tests/validate-extension.mjs"
+  }
+}

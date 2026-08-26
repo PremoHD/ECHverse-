@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "AgentSmith Command Console",
+  "version": "2.0.0",
+  "description": "A local, user-directed browser agent with mission planning, page inspection, queues, and an append-only execution ledger.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_title": "AgentSmith Command Console",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

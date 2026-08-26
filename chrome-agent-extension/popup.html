@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AgentSmith Command Console</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <div class="brand-line">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span class="eyebrow">AGENTSMITH // LOCAL COMMAND CONSOLE</span>
+        </div>
+        <h1>Mission Control</h1>
+        <p id="missionState">Create a mission, inspect the active page, and approve each action before it runs.</p>
+      </header>
+
+      <section class="metrics" aria-label="Agent activity metrics">
+        <article class="metric"><span class="metric-label">MISSIONS</span><strong id="missionMetric">0</strong></article>
+        <article class="metric"><span class="metric-label">ACTIONS</span><strong id="actionMetric">0</strong></article>
+        <article class="metric"><span class="metric-label">SIGNALS</span><strong id="signalMetric">0</strong></article>
+      </section>
+
+      <nav class="tabbar" aria-label="Agent console sections">
+        <button class="tab active" type="button" data-panel="missionPanel">Mission</button>
+        <button class="tab" type="button" data-panel="signalsPanel">Signals</button>
+        <button class="tab" type="button" data-panel="auditPanel">Ledger</button>
+      </nav>
+
+      <section id="missionPanel" class="workspace active" aria-labelledby="instruction-heading">
+        <div class="panel instruction-panel">
+          <div class="section-heading">
+            <h2 id="instruction-heading">Mission brief</h2>
+            <span class="badge">Plan → Review → Run</span>
+          </div>
+          <label class="sr-only" for="instruction">Browser mission instruction</label>
+          <textarea id="instruction" rows="5" placeholder="Example: Inspect this page, then click Settings, then scroll to the bottom."></textarea>
+          <div class="quick-actions" aria-label="Example instructions">
+            <button type="button" class="quick-action" data-example="Inspect this page">Inspect page</button>
+            <button type="button" class="quick-action" data-example="Scroll to the bottom">Scroll</button>
+            <button type="button" class="quick-action" data-example="Click Settings">Click</button>
+            <button type="button" class="quick-action" data-example="Type hello@example.com into Email">Type</button>
+          </div>
+          <button id="planButton" class="primary" type="button">Build mission plan</button>
+        </div>
+
+        <section id="planPanel" class="panel hidden" aria-live="polite" aria-labelledby="plan-heading">
+          <div class="section-heading">
+            <h2 id="plan-heading">Approved queue</h2>
+            <span id="planCount" class="badge neutral">0 steps</span>
+          </div>
+          <ol id="planList" class="plan-list"></ol>
+          <div id="highImpactNotice" class="warning hidden">
+            <strong>High-impact action detected.</strong>
+            <p>The highlighted action may change data, send information, complete a transaction, publish content, or change account access. It remains blocked until you explicitly acknowledge it.</p>
+            <label class="check-row"><input id="highImpactApproval" type="checkbox" /> I understand and approve every highlighted action in this mission.</label>
+          </div>
+          <button id="runButton" class="primary run" type="button" disabled>Run approved mission</button>
+          <button id="clearButton" class="secondary" type="button">Clear plan</button>
+        </section>
+      </section>
+
+      <section id="signalsPanel" class="workspace" aria-labelledby="signals-heading">
+        <div class="panel">
+          <div class="section-heading">
+            <h2 id="signals-heading">Page signals</h2>
+            <span id="signalStatus" class="badge neutral">Not scanned</span>
+          </div>
+          <p class="helper">Inspect the active page to map visible buttons, links, and fields. The scan stores only control labels and risk markers locally; it does not upload page content.</p>
+          <button id="inspectButton" class="primary" type="button">Inspect active page</button>
+        </div>
+        <section id="inspectionSummary" class="panel hidden"></section>
+        <section class="panel">
+          <div class="section-heading"><h2>Review queue</h2><span id="signalCount" class="badge neutral">0 items</span></div>
+          <div id="signalsList" class="signal-list"><p class="empty-state">No page inspection has been run in this session.</p></div>
+        </section>
+      </section>
+
+      <section id="auditPanel" class="workspace" aria-labelledby="ledger-heading">
+        <section class="panel">
+          <div class="section-heading"><h2 id="ledger-heading">Execution ledger</h2><span class="badge">Local only</span></div>
+          <p class="helper">The most recent 200 mission and action records are retained in local extension storage to support review and recovery.</p>
+          <div id="auditList" class="audit-list"><p class="empty-state">No activity recorded yet.</p></div>
+        </section>
+      </section>
+
+      <section class="panel permissions" aria-labelledby="permissions-heading">
+        <div class="section-heading">
+          <h2 id="permissions-heading">Site access</h2>
+          <span id="accessBadge" class="badge neutral">Checking…</span>
+        </div>
+        <p>By default, the agent can work only in the tab from which you open it. Enable broader access only when you want an approved mission to continue after navigating to another website.</p>
+        <button id="accessButton" class="secondary" type="button">Enable optional all-site access</button>
+      </section>
+
+      <section class="safety-note">
+        <h2>Operating boundary</h2>
+        <p>AgentSmith is designed for capable, user-directed browser automation—not hidden or unlimited operation. It works locally, does not send webpage content to a remote service, and keeps high-impact actions and secret entry under direct user control.</p>
+      </section>
+
+      <output id="status" class="status" aria-live="polite"></output>
+    </main>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

@@ -1,3 +1,4 @@
+ code.gs.exc
 #!/usr/bin/env bash
 # ==============================================================================
 # EllisCare.work.gd — Production Deployment & Archival Script (zip.sh)

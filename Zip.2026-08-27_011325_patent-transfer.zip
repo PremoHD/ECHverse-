@@ -1,0 +1,23 @@
+Zip.2026-08-27_011325_patent-encapsulation.
+hjson⁠
+{
+  "acknowledgment": "EVENT_RECORDED_AND_BOUND",
+  "timestamp": "2026-08-27T08:16:02Z",
+  "event": "PATENT_TRANSFER",
+  "actor": {
+    "entity": "Ellis Care Inc.",
+    "representative": "Justus Malik Ellis"
+  },
+  "target_asset": {
+    "jurisdiction": "US",
+    "patent_number": "US11354666B1",
+    "designation": "ECH://elliscare•work•gd/mil"
+  },
+  "cryptographic_integrity": {
+    "previous_hash": "0xa78f4b93c21e60f890d12e56ba78bc91234ea7fbc8901234efbc8901234edef0",
+    "merkle_root": "0x3f1c89b274e0d912836fae821b039481237aef89b234c90123ef8901234abcd1",
+    "signature": "VERIFIED_STATE_SUCCESS"
+  },
+  "status": "SECURED"
+}
+

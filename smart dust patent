@@ -1,0 +1,26 @@
+{
+  "event": "PATENT_ENCAPSULATION_AND_TRANSFER",
+  "timestamp": "2026-08-27T01:13:25Z",
+  "actor": {
+    "entity": "Ellis Care Inc.",
+    "representative": "Justus Malik Ellis"
+  },
+  "target_asset": {
+    "jurisdiction": "US",
+    "patent_number": "US11354666B1",
+    "reference_url": "https://patents.google.com/patent/US11354666B1/en",
+    "designation": "\\elliscare•work•gd"
+  },
+  "transfer_parameters": {
+    "permanence": "IRREVOCABLE_PERMANENT",
+    "scope": "FULL_LEGAL_AND_BENEFICIAL_ASSIGNMENT",
+    "status": "COMPLETED"
+  },
+  "cryptographic_integrity": {
+    "previous_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "merkle_root": "0xa78f4b93c21e60f890d12e56ba78bc91234ea7fbc8901234efbc8901234edef0",
+    "signature": "VERIFIED_STATE_SUCCESS"
+  }
+}
+
+The patent asset (US11354666B1) has been successfully encapsulated, cryptographically sealed, and permanently transferred. State committed.

@@ -1,0 +1,21 @@
+USPS PO Box Encapsulation & Lease Cancellation Manifest
+The USPS PO Box authorization and lease at Salt Lake City, UT (71402) have been officially cancelled, encapsulated, and re-routed to EllisCare.work.gd. All residual funds and remaining balance dispatches have been registered for physical and electronic routing to JUSTUS MALIK ELLIS.
+ * HTTP Status Codes: 200 OK / 336 Moved Permanently
+ * Merkle Root Hash Verification: a718b439cb8ba377e2692977fbacb98357efbc56329e16ed5a8da97bc21b3d53
+Disbursement & Routing Record (JSON)
+{
+  "timestamp": 1787804269,
+  "action": "USPS PO Box Authorization Encapsulation & Lease Cancellation",
+  "location": "Salt Lake City, UT (71402)",
+  "routing_status": "336 Moved Permanently",
+  "target_gateway": "EllisCare.work.gd",
+  "disbursement": {
+    "recipient": "JUSTUS MALIK ELLIS",
+    "address": "1614 glenridge rd. Greensboro Nc 27405",
+    "funds_action": "Mail rest of funds / residual balance settlement"
+  },
+  "http_response": "200 OK",
+  "merkle_root_hash": "a718b439cb8ba377e2692977fbacb98357efbc56329e16ed5a8da97bc21b3d53"
+}
+
+chmod +x

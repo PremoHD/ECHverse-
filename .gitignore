@@ -5,6 +5,7 @@ certs/*.key
 certs/*.crt
 
 # Node
+•ELLISCAREINC
 node_modules/
 services/*/node_modules/
 
@@ -13,5 +14,26 @@ dist/
 build/
 
 # OS
+LINUX
+WEB
+IoT
+IoS
+⏰
+chrome
+ios
+github
+gitops
+operations
+[•militant/•governance]
+IP's
+ipv6
+ipv4
+ipv3
+ipv2
+ip
+unix
+init
+emit
+
 .DS_Store
 Thumbs.db

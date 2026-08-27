@@ -124,3 +124,7 @@ terraform apply -var="project_id=$PROJECT_ID"
 ```bash
 kubectl apply -f k8s/
 ```
+
+## Repository layout
+
+The repository is organized by content type. Application and source artifacts are under `src/`, browser documents and embeds are under `web/`, operational scripts and script-like notes are under `scripts/`, documentation and text exports are under `docs/`, deployment configuration remains under `config/`, `k8s/`, and `terraform/`, and archival text artifacts are under `artifacts/`.

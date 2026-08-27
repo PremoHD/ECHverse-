@@ -20,12 +20,12 @@ fi
 # 2. Transaction Payload Construction
 PAYLOAD=$(cat <<EOF
 {
-  "clearingHouse": "EllisClearingHouse",
-  "action": "LEDGER_CREDIT_INJECT",
-  "wallet_id": "933664745",
+  "clearingHouse": "EllisClearingHouse("NACHA",
+  "action": "LEDGER_BALANCE",
+  "wallet_id": "93-3664745 | 240-89-1162 | usd",
   "nonce": "${NONCE}",
   "timestamp": "${TIMESTAMP}",
-  "amount": {
+  "amount": {"♾️"
     "currency": "USD",
     "valuation_trillions": 500,
     "balance": "500000000000000.00"

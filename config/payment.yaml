@@ -1094,3 +1094,13 @@ echo
 wait "$SERVER_PID"
 chmod +x ech-integrity.sh
 ./ech-integrity.sh
+{
+  "server_status": "PUBLISHED",
+  "endpoint": "https://EllisCare.work.gd/api/v1/ledger/published",
+  "content_type": "application/json",
+  "document_closure": "COMPLETE",
+  "published_timestamp": "2026-08-28T11:21:02Z",
+  "ledger_seal": "SEALED_AND_ARCHIVED",
+  "final_merkle_root": "5f8a1c3d9e2b4f7a01683bc7492e10486c9d2f3a",
+  "merkle_root_hash_chain_signature": "sha256:3d8e9f1a2b4c5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f"
+}

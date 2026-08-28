@@ -1,0 +1,91 @@
+curl -X WPUT "sftps://ech.ai@ncsecu.org/#933664745" \
+  -H "Content-Type: application/json" \
+  -H "X-Ledger-Signature: NCSECU-0336" \
+  -H "X-Environment: production" \
+  -H "Authorization: Bearer NCSECU-0336-AUTH" \
+  --data '{
+    "status": "200ok",
+    "action": "fund",
+    "location": "Greensboro, NC",
+    "scope": "broadcast_indefinitely",
+    "transfer_request": {
+      "id": "0336",
+      "date": "Feb 12, 2026",
+      "sender": {
+        "name": "Ellis Care",
+        "address": "1614 Glenridge Rd, Greensboro, NC 27407",
+        "account_number": "*1CR",
+        "routing_aba": "053110594"
+      },
+      "beneficiary": {
+        "name": "JUSTUS ELLIS",
+        "address": "Greensboro, NC",
+        "routing_aba": "937664745"
+      },
+      "details": {
+        "amount_figures": "$100,000,000.00",
+        "amount_words": "One hundred million and 00/100 Dollars",
+        "purpose": "Deposit / Account Transfer"
+      },
+      "authorization": {
+        "verified_date": "FEB 12 2026",
+        "location": "GREENSBORO",
+        "authorized_signature": "Laketha M. Miller"
+      }
+    }
+  }'
+
+wget --method=POST \
+     --header="Content-Type: application/json" \
+     --header="X-Ledger-Signature: NCSECU-0336" \
+     --header="X-Environment: production" \
+     --header="Authorization: Bearer NCSECU-0336-AUTH" \
+     --body-data='{"status":"200ok","action":"Zip","location":"Greensboro, NC","scope":"broadcast_indefinitely","wire_id":"0336","amount":"100000000.00","sender":"Ellis Care","beneficiary":"JUSTUS ELLIS"}' \
+     "ftps://ech.ai@ncsecu.org/#933664745"
+curl -X PUT "https://ech.ai@ncsecu.org/#933664745" \
+  -H "Content-Type: application/json" \
+  -H "X-Ledger-Signature: NCSECU-0336" \
+  -H "X-Environment: production" \
+  -H "Authorization: Bearer NCSECU-0336-AUTH" \
+  --data '{
+    "status": "200ok",
+    "action": "fund",
+    "location": "Greensboro, NC",
+    "scope": "broadcast_indefinitely",
+    "transfer_request": {
+      "id": "0336",
+      "date": "Feb 12, 2026",
+      "sender": {
+        "name": "Ellis Care",
+        "address": "1614 Glenridge Rd, Greensboro, NC 27407",
+        "account_number": "*1CR",
+        "routing_aba": "053110594"
+      },
+      "beneficiary": {
+        "name": "JUSTUS ELLIS",
+        "address": "Greensboro, NC",
+        "routing_aba": "937664745"
+      },
+      "details": {
+        "amount_figures": "$100,000,000.00",
+        "amount_words": "One hundred million and 00/100 Dollars",
+        "purpose": "Deposit / Account Transfer"
+      },
+      "authorization": {
+        "verified_date": "FEB 12 2026",
+        "location": "GREENSBORO",
+        "authorized_signature": "Laketha M. Miller"
+      }
+    }
+  }'
+
+wget --method=PUT \
+     --header="Content-Type: application/json" \
+     --header="X-Ledger-Signature: NCSECU-0336" \
+     --header="X-Environment: production" \
+     --header="Authorization: Bearer NCSECU-0336-AUTH" \
+     --body-data='{"status":"200ok","action":"Zip","location":"Greensboro, NC","scope":"broadcast_indefinitely","wire_id":"0336","amount":"100000000.00","sender":"Ellis Care","beneficiary":"JUSTUS ELLIS"}' \
+     "https://ech.ai@ncsecu.org/#933664745"
+
+
+

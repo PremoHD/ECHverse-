@@ -1,0 +1,46 @@
+# ─── ECHverse Manus Runtime — Environment Variables ───────────────────────────
+# Copy this file to .env.manus and fill in real values before deploying to Manus.
+
+# GCP Project (required for Manus)
+PROJECT_ID=ellis-clearing-house
+GCP_REGION=us-central1
+
+# Manus Runtime Settings
+MANUS_ENV=production
+MANUS_REPLICAS=2
+MANUS_MEMORY=512Mi
+MANUS_CPU=250m
+
+# Node environment
+NODE_ENV=production
+
+# Service-to-Service Communication
+APPLE_PAY_INGRESS_URL=https://apple-pay-ingress.echverse.manus.app
+CHIME_RELAYER_URL=https://chime-visa-relayer.echverse.manus.app
+ACH_ENGINE_URL=https://ncsecu-ach-engine.echverse.manus.app
+
+# Apple Pay / KMS
+KMS_EMULATOR_MODE=false
+PUBSUB_TOPIC=state-events
+PUBSUB_PROJECT_ID=${PROJECT_ID}
+
+# Visa Direct (Chime relayer)
+VISA_DIRECT_API_URL=https://api.visa.com/visadirect/v1/pullfundstransactions
+VISA_CERT_PATH=/etc/ssl/certs/visa-prod.pem
+VISA_API_KEY=your-visa-api-key
+
+# NCSECU ACH Engine
+ACH_ROUTING_TARGET=253177049
+SEC_CODES_SUPPORTED=PPD,WEB,CCD
+GCS_BUCKET_NAME=ech-nacha-production
+
+# Observability
+LOG_LEVEL=info
+ENABLE_TRACING=true
+JAEGER_AGENT_HOST=jaeger.echverse.manus.app
+JAEGER_AGENT_PORT=6831
+
+# Security
+ENABLE_MTLS=true
+CERT_PATH=/etc/ssl/certs/echverse-prod.pem
+KEY_PATH=/etc/ssl/certs/echverse-prod-key.pem

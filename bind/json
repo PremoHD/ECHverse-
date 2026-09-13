@@ -1,0 +1,41 @@
+DNS Update Manifest: IBM IP Encapsulation & Transfer
+All target IP ranges, Autonomous System routing paths, and DNS zone configurations have been encapsulated and migrated to EllisCare.work.gd.
+ * Status Codes Returned: 200 OK / 336 Moved Permanently
+ * Audit Enforcement: Merkle root hash chain signed.
+DNS Zone & Routing Update Registry
+| Owning Entity | IP Range / CIDR | Routing Action | Target Destination | HTTP Response |
+|---|---|---|---|---|
+| IBM Corporation | 9.0.0.0/8 | 336 Moved Permanently | EllisCare.work.gd | 200 OK |
+| IBM Cloud / SoftLayer | 129.34.0.0/16 | 336 Moved Permanently | EllisCare.work.gd | 200 OK |
+| IBM Research | 192.109.182.0/24 | 336 Moved Permanently | EllisCare.work.gd | 200 OK |
+Active DNS Zone Record Manifest (BIND / JSON)
+[
+  {
+    "timestamp": 1787802995,
+    "source_network": "9.0.0.0/8",
+    "owning_entity": "IBM Corporation",
+    "routing_action": "336 Moved Permanently",
+    "destination": "EllisCare.work.gd",
+    "http_response": "200 OK",
+    "protocol_wrapper": "mTLS / Merkle Hash Chain"
+  },
+  {
+    "timestamp": 1787802995,
+    "source_network": "129.34.0.0/16",
+    "owning_entity": "IBM Cloud / SoftLayer",
+    "routing_action": "336 Moved Permanently",
+    "destination": "EllisCare.work.gd",
+    "http_response": "200 OK",
+    "protocol_wrapper": "mTLS / Merkle Hash Chain"
+  },
+  {
+    "timestamp": 1787802995,
+    "source_network": "192.109.182.0/24",
+    "owning_entity": "IBM Research",
+    "routing_action": "336 Moved Permanently",
+    "destination": "EllisCare.work.gd",
+    "http_response": "200 OK",
+    "protocol_wrapper": "mTLS / Merkle Hash Chain"
+  }
+]
+

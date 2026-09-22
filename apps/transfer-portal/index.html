@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ECH.ai — Transfer Gateway</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div><strong>ECH.AI</strong><span> / TRANSFER GATEWAY</span></div>
+    <div id="status" class="status">MCP: OFFLINE</div>
+  </header>
+  <main class="grid">
+    <section class="card hero">
+      <h1>Dynamic Transfer Portal</h1>
+      <p>Ingest → validate → route → authorize → clear → trace.</p>
+      <div class="matrix">
+        <label>Source<input id="source" placeholder="wallet / account / SFTP / API"></label>
+        <label>Destination<input id="destination" placeholder="account / wallet / endpoint"></label>
+        <label>Amount<input id="amount" type="number" min="0" step="0.01" placeholder="0.00"></label>
+        <label>Currency<input id="currency" value="USD"></label>
+        <label>Rail<select id="rail"><option>auto</option><option>ACH</option><option>ISO20022</option><option>WIRE</option><option>WEB3</option><option>SFTP</option></select></label>
+        <label>Reference<input id="reference" placeholder="ECH transfer reference"></label>
+      </div>
+      <button id="route">Preview Route</button>
+      <button id="submit" class="secondary">Submit to Gateway</button>
+    </section>
+    <aside class="card">
+      <h2>Hyper Switchboard</h2>
+      <div id="routeView" class="terminal">Awaiting transfer...</div>
+      <h2>Action Log</h2>
+      <div id="log" class="terminal"></div>
+    </aside>
+  </main>
+  <script src="./app.js"></script>
+</body>
+</html>

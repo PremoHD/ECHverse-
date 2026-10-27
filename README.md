@@ -22,6 +22,22 @@ ECH AUTH GATEWAY  (Envoy — QUIC/HTTP3 + mTLS)
 PUBSUB EMULATOR :8085   SPANNER EMULATOR :9010/9020
 ```
 
+## Experimental Fibonacci Gateway
+
+The repository also contains an isolated mathematical research module based
+on the attached Fibonacci-curve brief. It generates a golden-angle spiral,
+projects points into Cartesian coordinates, and assigns deterministic
+`time`/`space`/`history` labels for visualization. It is a **dry-run model**:
+it does not connect to payment gateways, ledgers, wallets, or external
+substrates, and it makes no claim about quantum or spiritual phenomena.
+
+See [`docs/fibonacci-gateway.md`](docs/fibonacci-gateway.md) and run:
+
+```bash
+python3 -m unittest discover -s tests -v
+python3 -m src.experimental.fibonacci_gateway 12
+```
+
 ## Services
 
 | Container | Image / Build | Purpose |
